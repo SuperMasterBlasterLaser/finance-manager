@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Button, Col } from 'react-bootstrap';
 import Login from './Login';
+import Main from './Main';
 
 class App extends Component {
   constructor(props) {
@@ -9,6 +9,8 @@ class App extends Component {
       error: '',
       isLoggedIn: false,
       isLoggingIn: false,
+      user: {},
+      transactions: [],
     }
   }
   componentDidMount() {
@@ -70,11 +72,9 @@ class App extends Component {
       );
     }
     return (
-      <div>
-        <Col mdOffset={3} xsOffset={3} md={8}>
-          <h1>Hello</h1>
-        </Col>
-      </div>
+      <Main
+        user={this.state.user}
+        transactions={this.state.transactions}/>
     );
   }
 }
