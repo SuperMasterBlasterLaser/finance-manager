@@ -10,16 +10,8 @@ class App extends Component {
       error: '',
       phone: '',
     }
-  }
-  componentDidMount() {
-    // this.props.db.collection("categories").onSnapshot((querySnapshot) => {
-    //     let categories = [];
-    //     querySnapshot.forEach((doc) => {
-    //         categories.push(doc.data());
-    //         console.log(doc.data());
-    //     });
-    //     this.setState({ categories });
-    // });
+    this.handleLogin = this.handleLogin.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   getValidationState() {
@@ -45,23 +37,21 @@ class App extends Component {
     return (
       <div>
         <Col mdOffset={3} xsOffset={3} md={6} xs={6}>
-          <form>
-            <FormGroup
-              controlId="Введите телефон"
-              validationState={this.getValidationState()}
-            >
-              <ControlLabel>Введите телефон (без +7 или 8)</ControlLabel>
-              <FormControl
-                type="text"
-                value={this.state.phone}
-                placeholder="7771234567"
-                onChange={this.handleChange.bind(this)}
-              />
-              <FormControl.Feedback />
-              {!!this.state.error && <HelpBlock>{this.state.error}</HelpBlock>}
-              <Button disabled={isDisabled} bsStyle="primary" onClick={this.handleLogin.bind(this)}>Войти</Button>
-            </FormGroup>
-          </form>
+          <FormGroup
+            controlId="Введите телефон"
+            validationState={this.getValidationState()}
+          >
+            <ControlLabel>Введите телефон (без +7 или 8)</ControlLabel>
+            <FormControl
+              type="text"
+              value={this.state.phone}
+              placeholder="7771234567"
+              onChange={this.handleChange}
+            />
+            <FormControl.Feedback />
+            {!!this.state.error && <HelpBlock>{this.state.error}</HelpBlock>}
+            <Button type="button" disabled={isDisabled} bsStyle="primary" onClick={this.handleLogin}>Войти</Button>
+          </FormGroup>
         </Col>
       </div>
     );

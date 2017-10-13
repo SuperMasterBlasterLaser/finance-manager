@@ -18,7 +18,7 @@ class App extends Component {
   }
   render() {
     return (
-      <div>
+      <Col bsClass="row">
         <Col mdOffset={2} xsOffset={2} md={8} xs={8}>
           <Table responsive>
             <thead>
@@ -43,7 +43,10 @@ class App extends Component {
             </tbody>
           </Table>
         </Col>
-      </div>
+        <Col md={2} xs={2}>
+          <Button bsStyle="primary" onClick={this.props.onLogout}>Выйти</Button>
+        </Col>
+      </Col>
     );
   }
 }

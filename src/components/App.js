@@ -2,16 +2,31 @@ import React, { Component } from 'react';
 import Login from './Login';
 import Main from './Main';
 
+const storage = window.localStorage;
+
 class App extends Component {
   constructor(props) {
     super(props);
+
+    let phone = storage.getItem('phone');
     this.state = {
       error: '',
-      isLoggedIn: false,
+      isLoggedIn: !!phone,
       isLoggingIn: false,
       user: {},
       transactions: [],
     }
+    if (this.state.isLoggedIn) {
+      this.handleLogin(phone)
+    }
+
+    this.handleLogin = this.handleLogin.bind(this);
+    this.logout = this.logout.bind(this);
+  }
+
+  logout() {
+    storage.removeItem('phone');
+    this.setState({ isLoggedIn: false });
   }
   componentDidMount() {
   }
@@ -30,7 +45,8 @@ class App extends Component {
       phone: `+7(${phone.slice(0,3)})${phone.slice(3)}`,
     }, { merge: true })
       .then(() => {
-        console.log("User craeted succesfully!");
+        console.log("Got or craeted user succesfully!");
+        storage.setItem('phone', phone);
 
         // add listener to user
         userRef.onSnapshot((doc) => {
@@ -66,7 +82,7 @@ class App extends Component {
       return (
         <Login
           db={this.props.db}
-          onLogin={this.handleLogin.bind(this)}
+          onLogin={this.handleLogin}
           isLoggingIn={this.state.isLoggingIn}
         />
       );
@@ -74,7 +90,8 @@ class App extends Component {
     return (
       <Main
         user={this.state.user}
-        transactions={this.state.transactions}/>
+        transactions={this.state.transactions}
+        onLogout={this.logout}/>
     );
   }
 }
