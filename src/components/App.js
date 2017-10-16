@@ -65,7 +65,7 @@ class App extends Component {
         let transactionsRef = userRef.collection('transactions');
         this.setState({ transactionsRef });
 
-        transactionsRef
+        transactionsRef.orderBy('timestamp', 'desc')
           .onSnapshot((querySnapshot) => {
             let transactions = [];
             querySnapshot.forEach((doc) => {

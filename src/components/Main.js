@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Col, Table, Modal, Nav, Navbar, NavItem,
+import { Button, Col, Table, Modal, Nav, Navbar, NavItem, Label,
   FormGroup, ControlLabel, FormControl, HelpBlock, InputGroup } from 'react-bootstrap';
 import moment from 'moment';
 import 'moment/locale/ru';
@@ -19,7 +19,19 @@ class Main extends Component {
     this.onAddIncome = this.onAddIncome.bind(this);
     this.handleValue = this.handleValue.bind(this);
     this.handleDesc = this.handleDesc.bind(this);
+    this.getIncome = this.getIncome.bind(this);
+    this.getOutcome = this.getOutcome.bind(this);
+    this.getSummary = this.getSummary.bind(this);
 
+  }
+  getIncome() {
+    return this.props.transactions.map(t => Math.max(0, t.value)).reduce((a, b) => (a + b), 0);
+  }
+  getOutcome() {
+    return this.props.transactions.map(t => Math.min(0, t.value)).reduce((a, b) => (a + b), 0);
+  }
+  getSummary() {
+    return this.props.transactions.map(t => t.value).reduce((a, b) => (a + b), 0);
   }
   onAddIncome() {
     let value = parseInt(this.state.value, 10);
@@ -68,16 +80,23 @@ class Main extends Component {
             </NavItem>
           </Nav>
         </Navbar>
-        <Col bsClass="row">
-          <Col mdOffset={2} xsOffset={2} md={8} xs={8}>
-            <div className="main-title"> {this.props.user.phone} </div>
-          </Col>
-        </Col>
         <Col bsClass="row" className="main-actions">
-          <Col mdOffset={2} xsOffset={2} md={8} xs={8}>
+          <Col mdOffset={2} xsOffset={2} md={4} xs={4}>
+            <div className="main-title"> {this.props.user.phone} </div>
             <Button className="main-action" bsStyle="success" onClick={this.openIncome}>Поступление</Button>
             <Button className="main-action" bsStyle="danger" onClick={() => this.openIncome(true)}>Расход</Button>
           </Col>
+          <Col md={4} xs={4}>
+            <Table>
+              <tbody>
+                <tr><td>Поступлния</td><td>{this.getIncome()}</td></tr>
+                <tr><td>Расходы</td><td>{this.getOutcome()}</td></tr>
+                <tr><td>Итог</td><td>{this.getSummary()}</td></tr>
+              </tbody>
+            </Table>
+          </Col>
+        </Col>
+        <Col bsClass="row" className="main-summary">
         </Col>
         <Col bsClass="row">
           <Col mdOffset={2} xsOffset={2} md={8} xs={8}>
@@ -93,10 +112,10 @@ class Main extends Component {
               </thead>
               <tbody>
                 {this.props.transactions.map((t,index) => (
-                  <tr key={index}>
+                  <tr className="transaction" key={index}>
                     <td>{index+1}</td>
                     <td>{this.dateByTimestamp(t.timestamp)}</td>
-                    <td>{t.value}</td>
+                    <td className={t.value>0?"income":"outcome"}>{t.value}</td>
                     <td>{t.description}</td>
                     <td>{t.category ? t.category.name : ''}</td>
                   </tr>

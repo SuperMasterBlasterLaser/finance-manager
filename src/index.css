@@ -21,3 +21,10 @@ body {
 .navbar-brand {
 	color: #8cc64a !important;
 }
+
+.transaction .income {
+	color: green;
+}
+.transaction .outcome {
+	color: red;
+}
