@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Button, Col,
-  FormGroup, ControlLabel, FormControl, HelpBlock } from 'react-bootstrap';
+  FormGroup, ControlLabel, FormControl, HelpBlock, InputGroup } from 'react-bootstrap';
 
 
 class App extends Component {
@@ -41,13 +41,17 @@ class App extends Component {
             controlId="Введите телефон"
             validationState={this.getValidationState()}
           >
-            <ControlLabel>Введите телефон (без +7 или 8)</ControlLabel>
-            <FormControl
-              type="text"
-              value={this.state.phone}
-              placeholder="7771234567"
-              onChange={this.handleChange}
-            />
+            <ControlLabel>Введите телефон</ControlLabel>
+            <InputGroup>
+            <InputGroup.Addon>+7</InputGroup.Addon>
+              <FormControl
+                type="text"
+                value={this.state.phone}
+                placeholder="7771234567"
+                onChange={this.handleChange}
+              />
+              <FormControl.Feedback />
+            </InputGroup>
             <FormControl.Feedback />
             {!!this.state.error && <HelpBlock>{this.state.error}</HelpBlock>}
             <Button type="button" disabled={isDisabled} bsStyle="primary" onClick={this.handleLogin}>Войти</Button>

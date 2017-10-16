@@ -22,6 +22,7 @@ class App extends Component {
 
     this.handleLogin = this.handleLogin.bind(this);
     this.logout = this.logout.bind(this);
+    this.addTransaction = this.addTransaction.bind(this);
   }
 
   logout() {
@@ -39,6 +40,7 @@ class App extends Component {
     // get user by phone
     let userRef = this.props.db.collection('users').doc(phone);
 
+    this.setState({ userRef });
     // create if not exist
     userRef.set({
       id: phone,
@@ -60,7 +62,10 @@ class App extends Component {
         });
 
         // add listener to user transaction
-        userRef.collection('transactions')
+        let transactionsRef = userRef.collection('transactions');
+        this.setState({ transactionsRef });
+
+        transactionsRef
           .onSnapshot((querySnapshot) => {
             let transactions = [];
             querySnapshot.forEach((doc) => {
@@ -74,7 +79,9 @@ class App extends Component {
         this.setState({ isLoggingIn: false });
         console.error("Error writing document: ", error);
       })
-
+  }
+  addTransaction(data) {
+    this.state.transactionsRef.add(data);
   }
 
   render() {
@@ -91,6 +98,7 @@ class App extends Component {
       <Main
         user={this.state.user}
         transactions={this.state.transactions}
+        onAddTransaction={this.addTransaction}
         onLogout={this.logout}/>
     );
   }
