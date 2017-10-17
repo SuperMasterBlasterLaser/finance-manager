@@ -1,8 +1,14 @@
 import React, { Component } from 'react';
+import qs from 'qs';
+
 import Login from './Login';
 import Main from './Main';
 
 const storage = window.localStorage;
+
+let SERVER_URL = "http://35.156.112.74:3000/";
+
+let classifyUrl = SERVER_URL + 'classify_transaction';
 
 class App extends Component {
   constructor(props) {
@@ -30,6 +36,14 @@ class App extends Component {
     this.setState({ isLoggedIn: false });
   }
   componentDidMount() {
+    this.props.db.collection('categories')
+      .onSnapshot((snapshot) => {
+        let categories = {};
+        snapshot.forEach(doc => {
+          categories[doc.id] = doc.data();
+        })
+        this.setState({ categories });
+      })
   }
   clearError() {
     this.setState({ error: '' });
@@ -81,7 +95,28 @@ class App extends Component {
       })
   }
   addTransaction(data) {
-    this.state.transactionsRef.add(data);
+    this.state.transactionsRef.add(data)
+    .then((transaction) => {
+      this.addCategory({
+        id: transaction.id,
+        text: data.description,
+        phone: this.state.user.id,
+      });
+    });
+  }
+
+  addCategory(data) {
+    fetch(classifyUrl, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json, text/plain, *.*',
+        'Content-Type': 'application/json; charset=utf-8',
+      },
+      body: JSON.stringify( data )
+    })
+    .then((res) => {
+      console.log(res);
+    })
   }
 
   render() {
@@ -97,6 +132,7 @@ class App extends Component {
     return (
       <Main
         user={this.state.user}
+        categories={this.state.categories}
         transactions={this.state.transactions}
         onAddTransaction={this.addTransaction}
         onLogout={this.logout}/>

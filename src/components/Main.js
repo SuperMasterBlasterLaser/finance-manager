@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Col, Table, Modal, Nav, Navbar, NavItem, Label,
+import { Button, Col, Table, Modal, Nav, Navbar, NavItem,
   FormGroup, ControlLabel, FormControl, HelpBlock, InputGroup } from 'react-bootstrap';
 import moment from 'moment';
 import 'moment/locale/ru';
@@ -11,6 +11,7 @@ class Main extends Component {
     super(props);
     this.state = {
       isOpenIncome: false,
+      isOutcome: false,
       value: '',
       description: '',
     }
@@ -22,7 +23,6 @@ class Main extends Component {
     this.getIncome = this.getIncome.bind(this);
     this.getOutcome = this.getOutcome.bind(this);
     this.getSummary = this.getSummary.bind(this);
-
   }
   getIncome() {
     return this.props.transactions.map(t => Math.max(0, t.value)).reduce((a, b) => (a + b), 0);
@@ -65,6 +65,21 @@ class Main extends Component {
   handleDesc(e) { 
     this.setState({ description: e.target.value });
   }
+  renderTransaction(t, index) {
+    let categoryName = '';
+    if (this.props.categories[t.category.id])
+      categoryName = this.props.categories[t.category.id].name;
+    return (
+      <tr className="transaction" key={index}>
+        <td>{index+1}</td>
+        <td>{this.dateByTimestamp(t.timestamp)}</td>
+        <td className={t.value>0?"income":"outcome"}>{t.value}</td>
+        <td>{t.description}</td>
+        <td>{categoryName}</td>
+      </tr>
+    );
+  }
+
   render() {
     return (
       <div>
@@ -83,7 +98,7 @@ class Main extends Component {
         <Col bsClass="row" className="main-actions">
           <Col mdOffset={2} xsOffset={2} md={4} xs={4}>
             <div className="main-title"> {this.props.user.phone} </div>
-            <Button className="main-action" bsStyle="success" onClick={this.openIncome}>Поступление</Button>
+            <Button className="main-action" bsStyle="success" onClick={() => this.openIncome(false)}>Поступление</Button>
             <Button className="main-action" bsStyle="danger" onClick={() => this.openIncome(true)}>Расход</Button>
           </Col>
           <Col md={4} xs={4}>
@@ -111,27 +126,19 @@ class Main extends Component {
                 </tr>
               </thead>
               <tbody>
-                {this.props.transactions.map((t,index) => (
-                  <tr className="transaction" key={index}>
-                    <td>{index+1}</td>
-                    <td>{this.dateByTimestamp(t.timestamp)}</td>
-                    <td className={t.value>0?"income":"outcome"}>{t.value}</td>
-                    <td>{t.description}</td>
-                    <td>{t.category ? t.category.name : ''}</td>
-                  </tr>
-                ))}
+                {this.props.transactions.map((t,index) => this.renderTransaction(t, index))}
               </tbody>
             </Table>
           </Col>
         </Col>
         <Modal show={this.state.isOpenIncome} onHide={this.closeIncome}>
           <Modal.Header closeButton>
-            <Modal.Title>{this.state.isOutcome ? "Добавить поступление" : "Добавить расход"}</Modal.Title>
+            <Modal.Title>{!this.state.isOutcome ? "Добавить поступление" : "Добавить расход"}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <FormGroup
               validationState={null}>
-              <ControlLabel>{this.state.isOutcome ? "Поступление" : "Расход"} </ControlLabel>
+              <ControlLabel>{!this.state.isOutcome ? "Поступление" : "Расход"} </ControlLabel>
               <InputGroup>
                 <FormControl
                   type="text"
