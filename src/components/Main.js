@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { Button, Col, Table, Modal, Nav, Navbar, NavItem,
+import { Button, Col, Table, Modal, Nav, Navbar, NavItem, Tab, Tabs,
   FormGroup, ControlLabel, FormControl, HelpBlock, InputGroup } from 'react-bootstrap';
 import moment from 'moment';
 import 'moment/locale/ru';
+
+import { TAB_TABLE, TAB_GRAPH } from './constants';
 
 const formatStr = 'DD MMM YYYY, HH:mm';
 
@@ -101,7 +103,7 @@ class Main extends Component {
             <Button className="main-action" bsStyle="success" onClick={() => this.openIncome(false)}>Поступление</Button>
             <Button className="main-action" bsStyle="danger" onClick={() => this.openIncome(true)}>Расход</Button>
           </Col>
-          <Col md={4} xs={4}>
+          <Col md={4} xs={4} className="main-summary">
             <Table>
               <tbody>
                 <tr><td>Поступлния</td><td>{this.getIncome()}</td></tr>
@@ -111,24 +113,29 @@ class Main extends Component {
             </Table>
           </Col>
         </Col>
-        <Col bsClass="row" className="main-summary">
-        </Col>
         <Col bsClass="row">
           <Col mdOffset={2} xsOffset={2} md={8} xs={8}>
-            <Table responsive>
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Дата</th>
-                  <th>Сумма</th>
-                  <th>Описание</th>
-                  <th>Категория</th>
-                </tr>
-              </thead>
-              <tbody>
-                {this.props.transactions.map((t,index) => this.renderTransaction(t, index))}
-              </tbody>
-            </Table>
+            <Tabs defaultActiveKey={this.props.tabIndex} id="tabs">
+              <Tab eventKey={TAB_TABLE} title="История">
+                <Table responsive>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Дата</th>
+                      <th>Сумма</th>
+                      <th>Описание</th>
+                      <th>Категория</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {this.props.transactions.map((t,index) => this.renderTransaction(t, index))}
+                  </tbody>
+                </Table>
+              </Tab>
+              <Tab eventKey={TAB_GRAPH} title="График">
+              </Tab>
+            </Tabs>
+
           </Col>
         </Col>
         <Modal show={this.state.isOpenIncome} onHide={this.closeIncome}>

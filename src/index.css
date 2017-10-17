@@ -10,7 +10,9 @@ body {
 	font-weight: bold;
 	margin-bottom: 24px;
 }
-
+.main-summary {
+	margin-top: 12px;
+}
 .main-action {
 	margin-right: 24px;
 }
@@ -27,4 +29,11 @@ body {
 }
 .transaction .outcome {
 	color: red;
+}
+
+#tabs ul li.active a {
+	background-color: #dceeff;
+}
+#tabs ul li a:hover {
+	background-color: #dee7ee;
 }

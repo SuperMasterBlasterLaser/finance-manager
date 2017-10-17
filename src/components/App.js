@@ -1,14 +1,10 @@
 import React, { Component } from 'react';
-import qs from 'qs';
-
 import Login from './Login';
 import Main from './Main';
 
+import { classifyUrl, TAB_TABLE } from './constants';
+
 const storage = window.localStorage;
-
-let SERVER_URL = "http://35.156.112.74:3000/";
-
-let classifyUrl = SERVER_URL + 'classify_transaction';
 
 class App extends Component {
   constructor(props) {
@@ -21,6 +17,7 @@ class App extends Component {
       isLoggingIn: false,
       user: {},
       transactions: [],
+      tabIndex: TAB_TABLE,
     }
     if (this.state.isLoggedIn) {
       this.handleLogin(phone)
@@ -29,11 +26,6 @@ class App extends Component {
     this.handleLogin = this.handleLogin.bind(this);
     this.logout = this.logout.bind(this);
     this.addTransaction = this.addTransaction.bind(this);
-  }
-
-  logout() {
-    storage.removeItem('phone');
-    this.setState({ isLoggedIn: false });
   }
   componentDidMount() {
     this.props.db.collection('categories')
@@ -44,6 +36,10 @@ class App extends Component {
         })
         this.setState({ categories });
       })
+  }
+  logout() {
+    storage.removeItem('phone');
+    this.setState({ isLoggedIn: false });
   }
   clearError() {
     this.setState({ error: '' });
@@ -94,6 +90,11 @@ class App extends Component {
         console.error("Error writing document: ", error);
       })
   }
+
+  changeTab(tabIndex) {
+    this.setState({ tabIndex });
+  }
+
   addTransaction(data) {
     this.state.transactionsRef.add(data)
     .then((transaction) => {
@@ -131,6 +132,8 @@ class App extends Component {
     }
     return (
       <Main
+        tabIndex={this.state.tabIndex}
+        onChangeTab={this.changeTab}
         user={this.state.user}
         categories={this.state.categories}
         transactions={this.state.transactions}
