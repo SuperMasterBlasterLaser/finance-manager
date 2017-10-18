@@ -3,6 +3,7 @@ import { Button, Col, Table, Modal, Nav, Navbar, NavItem, Tab, Tabs,
   FormGroup, ControlLabel, FormControl, HelpBlock, InputGroup } from 'react-bootstrap';
 import moment from 'moment';
 import 'moment/locale/ru';
+import ReactHighstock from 'react-highcharts/ReactHighstock';
 
 import { TAB_TABLE, TAB_GRAPH } from './constants';
 
@@ -83,6 +84,21 @@ class Main extends Component {
   }
 
   render() {
+    let graphConfig = {
+      rangeSelector: {
+        selected: 1
+      },
+      title: {
+        text: 'Баланс'
+      },
+      series: [{
+        name: 'баланс',
+        data: this.props.transactions.map(t => [t.timestamp, t.value]),
+        tooltip: {
+          valueDecimals: 2
+        }
+      }]
+    };
     return (
       <div>
         <Navbar inverse>
@@ -133,6 +149,7 @@ class Main extends Component {
                 </Table>
               </Tab>
               <Tab eventKey={TAB_GRAPH} title="График">
+                <ReactHighstock config={graphConfig} domProps={{id: 'chartId'}}></ReactHighstock>
               </Tab>
             </Tabs>
 
