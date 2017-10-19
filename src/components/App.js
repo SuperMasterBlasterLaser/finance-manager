@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Login from './Login';
 import Main from './Main';
 
-import { classifyUrl, TAB_TABLE } from './constants';
+import { classifyUrl, TAB_TABLE, filters } from './constants';
 
 const storage = window.localStorage;
 
@@ -18,12 +18,18 @@ class App extends Component {
       user: {},
       transactions: [],
       tabIndex: TAB_TABLE,
+
+      filters: filters[0],
+      filterTransactions: [],
+      filterIndex: 0,
     }
     if (this.state.isLoggedIn) {
       this.handleLogin(phone)
     }
 
     this.handleLogin = this.handleLogin.bind(this);
+    this.changeTab = this.changeTab.bind(this);
+    this.changeFilter = this.changeFilter.bind(this);
     this.logout = this.logout.bind(this);
     this.addTransaction = this.addTransaction.bind(this);
   }
@@ -94,7 +100,11 @@ class App extends Component {
   changeTab(tabIndex) {
     this.setState({ tabIndex });
   }
-
+  changeFilter(filterIndex) {
+    setTimeout(() => {
+      this.setState({ filterIndex });
+    }, 200);
+  }
   addTransaction(data) {
     this.state.transactionsRef.add(data)
     .then((transaction) => {
@@ -130,13 +140,17 @@ class App extends Component {
         />
       );
     }
+
     return (
       <Main
         tabIndex={this.state.tabIndex}
         onChangeTab={this.changeTab}
+        filterIndex={this.state.filterIndex}
+        onChangeFilter={this.changeFilter}
         user={this.state.user}
         categories={this.state.categories}
-        transactions={this.state.transactions}
+        transactions={this.state.transactions
+          .filter(filters[this.state.filterIndex])}
         onAddTransaction={this.addTransaction}
         onLogout={this.logout}/>
     );

@@ -5,7 +5,7 @@ import moment from 'moment';
 import 'moment/locale/ru';
 import ReactHighstock from 'react-highcharts/ReactHighstock';
 
-import { TAB_TABLE, TAB_GRAPH } from './constants';
+import { TAB_TABLE, TAB_GRAPH, FILTER_TITLES } from './constants';
 
 const formatStr = 'DD MMM YYYY, HH:mm';
 
@@ -82,8 +82,28 @@ class Main extends Component {
       </tr>
     );
   }
-
+  renderTable() {
+    return (
+      <Table responsive>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Дата</th>
+            <th>Сумма</th>
+            <th>Описание</th>
+            <th>Категория</th>
+          </tr>
+        </thead>
+        <tbody>
+          {this.props.transactions.map((t,index) => this.renderTransaction(t, index))}
+        </tbody>
+      </Table>);
+  }
   render() {
+    let transactions = this.props.transactions.map(t => [t.timestamp, t.value]).reverse();
+    for (var i = 1; i < transactions.length; i++) {
+      transactions[i][1] += transactions[i-1][1];
+    }
     let graphConfig = {
       rangeSelector: {
         selected: 1
@@ -93,7 +113,7 @@ class Main extends Component {
       },
       series: [{
         name: 'баланс',
-        data: this.props.transactions.map(t => [t.timestamp, t.value]),
+        data: transactions,
         tooltip: {
           valueDecimals: 2
         }
@@ -116,43 +136,34 @@ class Main extends Component {
         <Col bsClass="row" className="main-actions">
           <Col mdOffset={2} xsOffset={2} md={4} xs={4}>
             <div className="main-title"> {this.props.user.phone} </div>
-            <Button className="main-action" bsStyle="success" onClick={() => this.openIncome(false)}>Поступление</Button>
+            <Button className="main-action" bsStyle="success" onClick={() => this.openIncome(false)}>Приход</Button>
             <Button className="main-action" bsStyle="danger" onClick={() => this.openIncome(true)}>Расход</Button>
           </Col>
           <Col md={4} xs={4} className="main-summary">
             <Table>
               <tbody>
-                <tr><td>Поступлния</td><td>{this.getIncome()}</td></tr>
-                <tr><td>Расходы</td><td>{this.getOutcome()}</td></tr>
-                <tr><td>Итог</td><td>{this.getSummary()}</td></tr>
+                <tr key={0}><td key="t">Поступлния</td><td key="v">{this.getIncome()}</td></tr>
+                <tr key={1}><td key="t">Расходы</td><td key="v">{this.getOutcome()}</td></tr>
+                <tr key={2}><td key="t">Итог</td><td key="v">{this.getSummary()}</td></tr>
               </tbody>
             </Table>
           </Col>
         </Col>
         <Col bsClass="row">
           <Col mdOffset={2} xsOffset={2} md={8} xs={8}>
-            <Tabs defaultActiveKey={this.props.tabIndex} id="tabs">
-              <Tab eventKey={TAB_TABLE} title="История">
-                <Table responsive>
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Дата</th>
-                      <th>Сумма</th>
-                      <th>Описание</th>
-                      <th>Категория</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {this.props.transactions.map((t,index) => this.renderTransaction(t, index))}
-                  </tbody>
-                </Table>
-              </Tab>
-              <Tab eventKey={TAB_GRAPH} title="График">
-                <ReactHighstock config={graphConfig} domProps={{id: 'chartId'}}></ReactHighstock>
-              </Tab>
+            <Tabs defaultActiveKey={0} onSelect={this.props.onChangeFilter} id="tabs-filters">
+              {[0,1,2].map((index) => (
+                <Tab key={index} eventKey={index} title={FILTER_TITLES[index]}>
+                  <Tabs defaultActiveKey={this.props.tabIndex} onSelect={this.props.onChangeTab} id="tabs">
+                    <Tab eventKey={TAB_TABLE} title="История">
+                      {this.renderTable()}
+                    </Tab>
+                    <Tab eventKey={TAB_GRAPH} title="График">
+                      <ReactHighstock config={graphConfig} domProps={{id: 'chartId'}}></ReactHighstock>
+                    </Tab>
+                  </Tabs>
+                </Tab>))}
             </Tabs>
-
           </Col>
         </Col>
         <Modal show={this.state.isOpenIncome} onHide={this.closeIncome}>
@@ -162,7 +173,7 @@ class Main extends Component {
           <Modal.Body>
             <FormGroup
               validationState={null}>
-              <ControlLabel>{!this.state.isOutcome ? "Поступление" : "Расход"} </ControlLabel>
+              <ControlLabel>{!this.state.isOutcome ? "Приход" : "Расход"} </ControlLabel>
               <InputGroup>
                 <FormControl
                   type="text"
