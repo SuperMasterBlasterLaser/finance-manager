@@ -140,6 +140,11 @@ class Main extends Component {
       </Tabs>);
   }
   render() {
+    let index = this.props.filterIndex;
+    let categoryTitle = "Категория";
+    if (!(index <= 2)) {
+      categoryTitle = this.props.categories.find(c => c.id === index).name;
+    }
     return (
       <div>
         <Navbar inverse>
@@ -181,7 +186,7 @@ class Main extends Component {
                   <NavItem eventKey={0}>{FILTER_TITLES[0]}</NavItem>
                   <NavItem eventKey={1}>{FILTER_TITLES[1]}</NavItem>
                   <NavItem eventKey={2}>{FILTER_TITLES[2]}</NavItem>
-                  <NavDropdown eventKey={3} title="Категория">
+                  <NavDropdown eventKey={3} title={categoryTitle}>
                     {this.props.categories.map((c) => (
                       <MenuItem key={c.id} eventKey={c.id}>{c.name}</MenuItem>
                     ))}
