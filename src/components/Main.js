@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Col, Table, Modal, Nav, Navbar, NavItem, Tab, Tabs,
+import { Button, Col, Table, Modal, Nav, Navbar, NavItem, Row, Tab, Tabs, NavDropdown, MenuItem, Fade,
   FormGroup, ControlLabel, FormControl, HelpBlock, InputGroup } from 'react-bootstrap';
 import moment from 'moment';
 import 'moment/locale/ru';
@@ -17,6 +17,7 @@ class Main extends Component {
       isOutcome: false,
       value: '',
       description: '',
+      isAppear: true,
     }
     this.closeIncome = this.closeIncome.bind(this);
     this.openIncome = this.openIncome.bind(this);
@@ -68,10 +69,19 @@ class Main extends Component {
   handleDesc(e) { 
     this.setState({ description: e.target.value });
   }
+  onSelect(id) {
+    this.props.onChangeFilter(id);
+    this.setState({ isAppear: false });
+  }
+  tabChange() {
+    setTimeout(() => {
+      this.setState({ isAppear: true });
+    }, 100);
+  }
   renderTransaction(t, index) {
-    let categoryName = '';
-    if (this.props.categories[t.category.id])
-      categoryName = this.props.categories[t.category.id].name;
+    let categoryName = t.category.name;
+    // if (!t.category.name)
+      // categoryName = this.props.categories.find(c=>c.id===t.category.id).name || '';
     return (
       <tr className="transaction" key={index}>
         <td>{index+1}</td>
@@ -99,7 +109,7 @@ class Main extends Component {
         </tbody>
       </Table>);
   }
-  render() {
+  renderData() {
     let transactions = this.props.transactions.map(t => [t.timestamp, t.value]).reverse();
     for (var i = 1; i < transactions.length; i++) {
       transactions[i][1] += transactions[i-1][1];
@@ -119,6 +129,22 @@ class Main extends Component {
         }
       }]
     };
+    return (
+      <Tabs defaultActiveKey={this.props.tabIndex} onSelect={this.props.onChangeTab} id="tabs">
+        <Tab eventKey={TAB_TABLE} title="История">
+          {this.renderTable()}
+        </Tab>
+        <Tab eventKey={TAB_GRAPH} title="График">
+          <ReactHighstock config={graphConfig} domProps={{id: 'chartId'}}></ReactHighstock>
+        </Tab>
+      </Tabs>);
+  }
+  render() {
+    let index = this.props.filterIndex;
+    let categoryTitle = "Категория";
+    if (!(index <= 2)) {
+      categoryTitle = this.props.categories.find(c => c.id === index).name;
+    }
     return (
       <div>
         <Navbar inverse>
@@ -149,22 +175,34 @@ class Main extends Component {
             </Table>
           </Col>
         </Col>
+
         <Col bsClass="row">
-          <Col mdOffset={2} xsOffset={2} md={8} xs={8}>
-            <Tabs defaultActiveKey={0} onSelect={this.props.onChangeFilter} id="tabs-filters">
-              {[0,1,2].map((index) => (
-                <Tab key={index} eventKey={index} title={FILTER_TITLES[index]}>
-                  <Tabs defaultActiveKey={this.props.tabIndex} onSelect={this.props.onChangeTab} id="tabs">
-                    <Tab eventKey={TAB_TABLE} title="История">
-                      {this.renderTable()}
-                    </Tab>
-                    <Tab eventKey={TAB_GRAPH} title="График">
-                      <ReactHighstock config={graphConfig} domProps={{id: 'chartId'}}></ReactHighstock>
-                    </Tab>
-                  </Tabs>
-                </Tab>))}
-            </Tabs>
-          </Col>
+          <Tab.Container id="tabs-with-dropdown"
+            defaultActiveKey={0}
+            onSelect={(id) => {this.onSelect(id)}}>
+            <Row className="clearfix">
+              <Col mdOffset={2} xsOffset={2} md={8} xs={8}>
+                <Nav bsStyle="tabs">
+                  <NavItem eventKey={0}>{FILTER_TITLES[0]}</NavItem>
+                  <NavItem eventKey={1}>{FILTER_TITLES[1]}</NavItem>
+                  <NavItem eventKey={2}>{FILTER_TITLES[2]}</NavItem>
+                  <NavDropdown eventKey={3} title={categoryTitle}>
+                    {this.props.categories.map((c) => (
+                      <MenuItem key={c.id} eventKey={c.id}>{c.name}</MenuItem>
+                    ))}
+                  </NavDropdown>
+                </Nav>
+              </Col>
+              <Col mdOffset={2} xsOffset={2} md={8} xs={8}>
+                <Fade
+                  timeout={300}
+                  in={this.state.isAppear}
+                  onExited={() => {this.tabChange()}}>
+                    {this.renderData()}
+                </Fade>
+              </Col>
+            </Row>
+          </Tab.Container>
         </Col>
         <Modal show={this.state.isOpenIncome} onHide={this.closeIncome}>
           <Modal.Header closeButton>

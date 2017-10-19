@@ -4,6 +4,12 @@ import Main from './Main';
 
 import { classifyUrl, TAB_TABLE, filters } from './constants';
 
+function filter(ts, index) {
+  if (index <= 2)
+    return ts.filter(filters[index]);
+  return ts.filter(t => t.category.id === index);
+}
+
 const storage = window.localStorage;
 
 class App extends Component {
@@ -17,16 +23,17 @@ class App extends Component {
       isLoggingIn: false,
       user: {},
       transactions: [],
+      categories: [],
       tabIndex: TAB_TABLE,
 
       filters: filters[0],
       filterTransactions: [],
       filterIndex: 0,
     }
-    if (this.state.isLoggedIn) {
-      this.handleLogin(phone)
-    }
 
+    if (!!phone) {
+      this.handleLogin(phone);
+    }
     this.handleLogin = this.handleLogin.bind(this);
     this.changeTab = this.changeTab.bind(this);
     this.changeFilter = this.changeFilter.bind(this);
@@ -36,11 +43,13 @@ class App extends Component {
   componentDidMount() {
     this.props.db.collection('categories')
       .onSnapshot((snapshot) => {
-        let categories = {};
+        let categories = [];
         snapshot.forEach(doc => {
-          categories[doc.id] = doc.data();
+          categories.push({...doc.data(), id: doc.id});
         })
         this.setState({ categories });
+
+        console.log('categories', categories);
       })
   }
   logout() {
@@ -85,7 +94,10 @@ class App extends Component {
           .onSnapshot((querySnapshot) => {
             let transactions = [];
             querySnapshot.forEach((doc) => {
-              transactions.push(doc.data());
+              var t = doc.data();
+              var category = this.state.categories.find(c => t.category.id === c.id);
+              if (!!category) t.category = category;
+              transactions.push(t);
             });
             this.setState({ transactions });
             console.log('transactions', transactions);
@@ -103,7 +115,7 @@ class App extends Component {
   changeFilter(filterIndex) {
     setTimeout(() => {
       this.setState({ filterIndex });
-    }, 200);
+    }, 300);
   }
   addTransaction(data) {
     this.state.transactionsRef.add(data)
@@ -140,7 +152,6 @@ class App extends Component {
         />
       );
     }
-
     return (
       <Main
         tabIndex={this.state.tabIndex}
@@ -149,8 +160,7 @@ class App extends Component {
         onChangeFilter={this.changeFilter}
         user={this.state.user}
         categories={this.state.categories}
-        transactions={this.state.transactions
-          .filter(filters[this.state.filterIndex])}
+        transactions={filter(this.state.transactions, this.state.filterIndex)}
         onAddTransaction={this.addTransaction}
         onLogout={this.logout}/>
     );
