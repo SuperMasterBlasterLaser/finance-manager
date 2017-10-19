@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Col, Table, Modal, Nav, Navbar, NavItem, Row, Tab, Tabs, NavDropdown, MenuItem,
+import { Button, Col, Table, Modal, Nav, Navbar, NavItem, Row, Tab, Tabs, NavDropdown, MenuItem, Fade,
   FormGroup, ControlLabel, FormControl, HelpBlock, InputGroup } from 'react-bootstrap';
 import moment from 'moment';
 import 'moment/locale/ru';
@@ -17,6 +17,7 @@ class Main extends Component {
       isOutcome: false,
       value: '',
       description: '',
+      isAppear: true,
     }
     this.closeIncome = this.closeIncome.bind(this);
     this.openIncome = this.openIncome.bind(this);
@@ -68,8 +69,19 @@ class Main extends Component {
   handleDesc(e) { 
     this.setState({ description: e.target.value });
   }
+  onSelect(id) {
+    this.props.onChangeFilter(id);
+    this.setState({ isAppear: false });
+  }
+  tabChange() {
+    setTimeout(() => {
+      this.setState({ isAppear: true });
+    }, 100);
+  }
   renderTransaction(t, index) {
-    let categoryName = this.props.categories.find(c=>c.id===t.category.id).name || '';
+    let categoryName = t.category.name;
+    // if (!t.category.name)
+      // categoryName = this.props.categories.find(c=>c.id===t.category.id).name || '';
     return (
       <tr className="transaction" key={index}>
         <td>{index+1}</td>
@@ -162,7 +174,7 @@ class Main extends Component {
         <Col bsClass="row">
           <Tab.Container id="tabs-with-dropdown"
             defaultActiveKey={0}
-            onSelect={this.props.onChangeFilter}>
+            onSelect={(id) => {this.onSelect(id)}}>
             <Row className="clearfix">
               <Col mdOffset={2} xsOffset={2} md={8} xs={8}>
                 <Nav bsStyle="tabs">
@@ -171,31 +183,22 @@ class Main extends Component {
                   <NavItem eventKey={2}>{FILTER_TITLES[2]}</NavItem>
                   <NavDropdown eventKey={3} title="Категория">
                     {this.props.categories.map((c) => (
-                      <MenuItem eventKey={c.id}>{c.name}</MenuItem>
+                      <MenuItem key={c.id} eventKey={c.id}>{c.name}</MenuItem>
                     ))}
                   </NavDropdown>
                 </Nav>
               </Col>
               <Col mdOffset={2} xsOffset={2} md={8} xs={8}>
-                <Tab.Content>
-                  {[0,1,2].concat(this.props.categories.map(c=>c.id)).map((id) => (
-                    <Tab.Pane eventKey={id}>{this.renderData()}</Tab.Pane>
-                  ))}
-                </Tab.Content>
+                <Fade
+                  timeout={300}
+                  in={this.state.isAppear}
+                  onExited={() => {this.tabChange()}}>
+                    {this.renderData()}
+                </Fade>
               </Col>
             </Row>
           </Tab.Container>
         </Col>
-        {/*<Col bsClass="row">
-          <Col mdOffset={2} xsOffset={2} md={8} xs={8}>
-            <Tabs defaultActiveKey={0} onSelect={this.props.onChangeFilter} id="tabs-filters">
-              {[0,1,2].map((index) => (
-                <Tab key={index} eventKey={index} title={FILTER_TITLES[index]}>
-                  {this.renderData()}
-                </Tab>))}
-            </Tabs>
-          </Col>
-        </Col>*/}
         <Modal show={this.state.isOpenIncome} onHide={this.closeIncome}>
           <Modal.Header closeButton>
             <Modal.Title>{!this.state.isOutcome ? "Добавить поступление" : "Добавить расход"}</Modal.Title>

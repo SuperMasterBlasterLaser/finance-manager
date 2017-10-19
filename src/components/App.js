@@ -30,10 +30,10 @@ class App extends Component {
       filterTransactions: [],
       filterIndex: 0,
     }
-    if (this.state.isLoggedIn) {
-      this.handleLogin(phone)
-    }
 
+    if (!!phone) {
+      this.handleLogin(phone);
+    }
     this.handleLogin = this.handleLogin.bind(this);
     this.changeTab = this.changeTab.bind(this);
     this.changeFilter = this.changeFilter.bind(this);
@@ -48,6 +48,8 @@ class App extends Component {
           categories.push({...doc.data(), id: doc.id});
         })
         this.setState({ categories });
+
+        console.log('categories', categories);
       })
   }
   logout() {
@@ -92,9 +94,10 @@ class App extends Component {
           .onSnapshot((querySnapshot) => {
             let transactions = [];
             querySnapshot.forEach((doc) => {
-              // var t = doc.data();
-              // if (this.props.categories.find(c => t.id === c.id))
-              transactions.push(doc.data());
+              var t = doc.data();
+              var category = this.state.categories.find(c => t.category.id === c.id);
+              if (!!category) t.category = category;
+              transactions.push(t);
             });
             this.setState({ transactions });
             console.log('transactions', transactions);
@@ -112,7 +115,7 @@ class App extends Component {
   changeFilter(filterIndex) {
     setTimeout(() => {
       this.setState({ filterIndex });
-    }, 200);
+    }, 300);
   }
   addTransaction(data) {
     this.state.transactionsRef.add(data)
